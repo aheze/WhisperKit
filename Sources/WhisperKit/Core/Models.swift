@@ -325,6 +325,30 @@ public struct TranscriptionSegment: Hashable, Codable {
     public var avgLogprob: Float
     public var compressionRatio: Float
     public var noSpeechProb: Float
+    
+    public init(
+        id: Int,
+        seek: Int,
+        start: Float,
+        end: Float,
+        text: String,
+        tokens: [Int],
+        temperature: Float,
+        avgLogprob: Float,
+        compressionRatio: Float,
+        noSpeechProb: Float
+    ) {
+        self.id = id
+        self.seek = seek
+        self.start = start
+        self.end = end
+        self.text = text
+        self.tokens = tokens
+        self.temperature = temperature
+        self.avgLogprob = avgLogprob
+        self.compressionRatio = compressionRatio
+        self.noSpeechProb = noSpeechProb
+    }
 }
 
 public struct TranscriptionProgress {
