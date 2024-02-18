@@ -94,7 +94,8 @@ public class SegmentSeeker: SegmentSeeking {
                 let sliceText = tokenizer.decode(tokens: slicedTextTokens)
 
                 let newSegment = TranscriptionSegment(
-                    id: allSegmentsCount + currentSegments.count,
+//                    id: allSegmentsCount + currentSegments.count,
+                    id: UUID().uuidString,
                     seek: seek,
                     start: timeOffset + startTimestampSeconds,
                     end: timeOffset + endTimestampSeconds,
@@ -133,7 +134,8 @@ public class SegmentSeeker: SegmentSeeking {
             let segmentText = tokenizer.decode(tokens: segmentTextTokens)
 
             let newSegment = TranscriptionSegment(
-                id: allSegmentsCount + currentSegments.count,
+//                id: allSegmentsCount + currentSegments.count,
+                id: UUID().uuidString,
                 seek: seek,
                 start: timeOffset,
                 end: timeOffset + durationSeconds,

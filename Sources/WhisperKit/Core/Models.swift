@@ -315,7 +315,7 @@ public struct TranscriptionResult: Codable {
 }
 
 public struct TranscriptionSegment: Hashable, Codable {
-    public var id: Int
+    public var id: String
     public var seek: Int
     public var start: Float
     public var end: Float
@@ -327,7 +327,7 @@ public struct TranscriptionSegment: Hashable, Codable {
     public var noSpeechProb: Float
     
     public init(
-        id: Int,
+        id: String,
         seek: Int,
         start: Float,
         end: Float,
