@@ -56,7 +56,7 @@ public extension AudioProcessing {
         try startRecordingLive(callback: callback)
     }
 
-    static func padOrTrimAudio(fromArray audioArray: [Float], startAt startIndex: Int = 0, toLength frameLength: Int = 480_000, saveSegment: Bool = false) -> MLMultiArray? {
+    static func padOrTrimAudio(fromArray audioArray: [Float], startAt startIndex: Int = 0, toLength frameLength: Int = 480000, saveSegment: Bool = false) -> MLMultiArray? {
         let currentFrameLength = audioArray.count
 
         if startIndex >= currentFrameLength, startIndex < 0 {
@@ -84,7 +84,7 @@ public extension AudioProcessing {
         if saveSegment {
             let desiredFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 16000, channels: 1, interleaved: false)!
             let newBuffer = AVAudioPCMBuffer(pcmFormat: desiredFormat, frameCapacity: AVAudioFrameCount(frameLength))!
-            for i in 0..<frameLength {
+            for i in 0 ..< frameLength {
                 newBuffer.floatChannelData?[0][i] = audioSamplesArray[i].floatValue
             }
             newBuffer.frameLength = AVAudioFrameCount(frameLength)
@@ -139,7 +139,7 @@ public class AudioProcessor: NSObject, AudioProcessing {
     public var audioEnergy: [(rel: Float, avg: Float, max: Float, min: Float)] = []
     public var relativeEnergyWindow: Int = 20
     public var relativeEnergy: [Float] {
-        return self.audioEnergy.map { $0.rel }
+        return audioEnergy.map { $0.rel }
     }
 
     public var audioBufferCallback: (([Float]) -> Void)?
@@ -317,24 +317,28 @@ public extension AudioProcessor {
         audioSamples.append(contentsOf: buffer)
 
         // Find the lowest average energy of the last 20 buffers ~2 seconds
-        let minAvgEnergy = self.audioEnergy.suffix(20).reduce(Float.infinity) { min($0, $1.avg) }
+        let minAvgEnergy = audioEnergy.suffix(20).reduce(Float.infinity) { min($0, $1.avg) }
         let relativeEnergy = Self.calculateRelativeEnergy(of: buffer, relativeTo: minAvgEnergy)
 
         // Update energy for buffers with valid data
         let signalEnergy = Self.calculateEnergy(of: buffer)
         let newEnergy = (relativeEnergy, signalEnergy.avg, signalEnergy.max, signalEnergy.min)
-        self.audioEnergy.append(newEnergy)
+        audioEnergy.append(newEnergy)
 
         // Call the callback with the new buffer
         audioBufferCallback?(buffer)
 
         // Print the current size of the audio buffer
-        if self.audioSamples.count % (minBufferLength * Int(relativeEnergyWindow)) == 0 {
-            Logging.debug("Current audio size: \(self.audioSamples.count) samples, most recent buffer: \(buffer.count) samples, most recent energy: \(newEnergy)")
+        if audioSamples.count % (minBufferLength * Int(relativeEnergyWindow)) == 0 {
+            Logging.debug("Current audio size: \(audioSamples.count) samples, most recent buffer: \(buffer.count) samples, most recent energy: \(newEnergy)")
         }
     }
 
     func setupEngine() throws -> AVAudioEngine {
+        let audioSession = AVAudioSession.sharedInstance()
+        try audioSession.setCategory(.playAndRecord, mode: .measurement, options: .duckOthers)
+        try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        
         let audioEngine = AVAudioEngine()
         let inputNode = audioEngine.inputNode
         let inputFormat = inputNode.outputFormat(forBus: 0)
